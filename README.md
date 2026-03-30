@@ -4,6 +4,7 @@
 
 
 <img width="661" height="601" alt="Network_diagram drawio" src="https://github.com/user-attachments/assets/e8bef1ed-1e08-4807-b4f2-4d13fb0165eb" />
+
 A home SOC lab for developing and testing detection queries against MITRE ATT&CK techniques using Wazuh as the primary SIEM. Built on VirtualBox with resource-constrained hardware in mind.
 
 ---
