@@ -75,7 +75,7 @@ The Windows endpoint (192.168.10.100) is joined to the AD domain hosted on the D
 
 ### Host Machine
 
-- **OS:** Linux (tested on Ubuntu/Debian-based)
+- **OS:** Linux (tested on Arch)
 - **RAM:** 16 GB minimum recommended (lab uses ~16.5 GB across all VMs)
 - **Disk:** 120 GB+ free (Wazuh's OpenSearch backend is storage-heavy — expect 50–60 GB for the server VM alone)
 - **CPU:** 8+ cores with virtualisation extensions enabled (check with `egrep -c '(vmx|svm)' /proc/cpuinfo`)
