@@ -1,0 +1,6 @@
+*.vdi
+*.nvram
+*.vbox-prev
+Logs/
+Snapshots/
+*.viso

@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2016-2025 Oracle and/or its affiliates.
+
+    This file is part of VirtualBox base platform packages, as
+    available from https://www.virtualbox.org.
+
+    This program is free software; you can redistribute it and/or
+    modify it under the terms of the GNU General Public License
+    as published by the Free Software Foundation, in version 3 of the
+    License.
+
+    This program is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, see <https://www.gnu.org/licenses>.
+
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+<unattend xmlns="urn:schemas-microsoft-com:unattend"
+    xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State">
+
+    <settings pass="windowsPE">
+        <component name="Microsoft-Windows-International-Core-WinPE"
+            processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral"
+            versionScope="nonSxS">
+            <InputLocale>en-US</InputLocale>
+            <SystemLocale>en-US</SystemLocale>
+            <UserLocale>en-US</UserLocale>
+            <!-- UILanguage must match the installation media language.  Stuff like de-CH does not work for
+                 example de_windows_7_enterprise_with_sp1_x64_dvd_u_677649.iso.  However, stupidly we cannot
+                 omit this element (kudos to brilliant minds at MS).  -->
+            <UILanguage>en-US</UILanguage>
+        </component>
+
+        <component name="Microsoft-Windows-Setup"
+            processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral"
+            versionScope="nonSxS">
+
+            <DiskConfiguration>
+                <WillShowUI>OnError</WillShowUI>
+                <Disk>
+                    <DiskID>0</DiskID>
+                    <WillWipeDisk>true</WillWipeDisk>
+
+
+                    <CreatePartitions>
+                        <CreatePartition wcm:action="add">
+                            <Order>1</Order>
+                            <Type>Primary</Type>
+                            <Size>300</Size>
+                        </CreatePartition>
+                        <CreatePartition wcm:action="add">
+                            <Order>2</Order>
+                            <Type>EFI</Type>
+                            <Size>100</Size>
+                        </CreatePartition>
+                        <CreatePartition wcm:action="add">
+                            <Order>3</Order>
+                            <Type>MSR</Type>
+                            <Size>128</Size>
+                        </CreatePartition>
+                        <CreatePartition wcm:action="add">
+                            <Order>4</Order>
+                            <Type>Primary</Type>
+                            <Extend>true</Extend>
+                        </CreatePartition>
+                    </CreatePartitions>
+                    <ModifyPartitions>
+                        <ModifyPartition wcm:action="add">
+                            <Order>1</Order>
+                            <PartitionID>1</PartitionID>
+                            <Label>WINRE</Label>
+                            <Format>NTFS</Format>
+                            <TypeID>de94bba4-06d1-4d40-a16a-bfd50179d6ac</TypeID>
+                        </ModifyPartition>
+                        <ModifyPartition wcm:action="add">
+                            <Order>2</Order>
+                            <PartitionID>2</PartitionID>
+                            <Label>EFI</Label>
+                            <Format>FAT32</Format>
+                        </ModifyPartition>
+                        <ModifyPartition wcm:action="add">
+                            <Order>3</Order>
+                            <PartitionID>3</PartitionID>
+                        </ModifyPartition>
+                        <ModifyPartition wcm:action="add">
+                            <Order>4</Order>
+                            <PartitionID>4</PartitionID>
+                            <Label>Windows</Label>
+                            <Letter>C</Letter>
+                            <Format>NTFS</Format>
+                        </ModifyPartition>
+                    </ModifyPartitions>
+
+                </Disk>
+            </DiskConfiguration>
+
+            <UserData>
+                <ProductKey>
+                    <Key></Key>
+                    <WillShowUI>OnError</WillShowUI>
+                </ProductKey>
+                <AcceptEula>true</AcceptEula>
+            </UserData>
+
+            <ImageInstall>
+                <OSImage>
+                    <InstallFrom>
+                        <!-- TODO: This stuff doesn't work for en_windows_vista_enterprise_sp1_x64_and_x86.iso ... -->
+                        <MetaData wcm:action="add">
+                            <Key>/IMAGE/INDEX</Key>
+                            <Value>6</Value>
+                        </MetaData>
+                        <!-- <Path>d:\sources\install.wim</Path> - the w7 tests doesn't specify this -->
+                    </InstallFrom>
+                    <InstallTo>
+                        <DiskID>0</DiskID>
+
+
+                        <PartitionID>4</PartitionID>
+
+                    </InstallTo>
+                    <WillShowUI>OnError</WillShowUI>
+                    <InstallToAvailablePartition>false</InstallToAvailablePartition>
+                </OSImage>
+            </ImageInstall>
+
+            <ComplianceCheck>
+                <DisplayReport>OnError</DisplayReport>
+            </ComplianceCheck>
+
+            <!-- Apply registry tweaks to Windows PE, skipping the checks in the Windows 11 setup program. This will not make it to the final install, and should do no harm with older Windows versions. -->
+            <RunAsynchronous>
+                <RunAsynchronousCommand>
+                    <Order>1</Order>
+                    <Path>reg.exe ADD HKLM\SYSTEM\Setup\LabConfig /v BypassCPUCheck /t REG_DWORD /d 1 /f</Path>
+                    <Description>Windows 11 disable CPU check</Description>
+                </RunAsynchronousCommand>
+                <RunAsynchronousCommand>
+                    <Order>2</Order>
+                    <Path>reg.exe ADD HKLM\SYSTEM\Setup\LabConfig /v BypassRAMCheck /t REG_DWORD /d 1 /f</Path>
+                    <Description>Windows 11 disable RAM check</Description>
+                </RunAsynchronousCommand>
+                <RunAsynchronousCommand>
+                    <Order>3</Order>
+                    <Path>reg.exe ADD HKLM\SYSTEM\Setup\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 1 /f</Path>
+                    <Description>Windows 11 disable Secure Boot check</Description>
+                </RunAsynchronousCommand>
+                <RunAsynchronousCommand>
+                    <Order>4</Order>
+                    <Path>reg.exe ADD HKLM\SYSTEM\Setup\LabConfig /v BypassStorageCheck /t REG_DWORD /d 1 /f</Path>
+                    <Description>Windows 11 disable Storage check</Description>
+                </RunAsynchronousCommand>
+                <RunAsynchronousCommand>
+                    <Order>5</Order>
+                    <Path>reg.exe ADD HKLM\SYSTEM\Setup\LabConfig /v BypassTPMCheck /t REG_DWORD /d 1 /f</Path>
+                    <Description>Windows 11 disable TPM check</Description>
+                </RunAsynchronousCommand>
+            </RunAsynchronous>
+
+        </component>
+    </settings>
+
+    <settings pass="specialize">
+        <component name="Microsoft-Windows-Shell-Setup"
+            processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral"
+            versionScope="nonSxS">
+            <ComputerName>TARGET-PC</ComputerName>
+        </component>
+
+        <component name="Microsoft-Windows-Deployment"
+            processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral"
+            versionScope="nonSxS">
+
+            <!-- Apply registry tweaks in the final Windows install, skipping the checks in the Windows 11 setup program. This means upgrades started in this install will work without compatibility complaints. -->
+            <RunAsynchronous>
+                <RunAsynchronousCommand>
+                    <Order>1</Order>
+                    <Path>reg.exe ADD HKLM\SYSTEM\Setup\LabConfig /v BypassCPUCheck /t REG_DWORD /d 1 /f</Path>
+                    <Description>Windows 11 disable CPU check</Description>
+                </RunAsynchronousCommand>
+                <RunAsynchronousCommand>
+                    <Order>2</Order>
+                    <Path>reg.exe ADD HKLM\SYSTEM\Setup\LabConfig /v BypassRAMCheck /t REG_DWORD /d 1 /f</Path>
+                    <Description>Windows 11 disable RAM check</Description>
+                </RunAsynchronousCommand>
+                <RunAsynchronousCommand>
+                    <Order>3</Order>
+                    <Path>reg.exe ADD HKLM\SYSTEM\Setup\LabConfig /v BypassSecureBootCheck /t REG_DWORD /d 1 /f</Path>
+                    <Description>Windows 11 disable Secure Boot check</Description>
+                </RunAsynchronousCommand>
+                <RunAsynchronousCommand>
+                    <Order>4</Order>
+                    <Path>reg.exe ADD HKLM\SYSTEM\Setup\LabConfig /v BypassStorageCheck /t REG_DWORD /d 1 /f</Path>
+                    <Description>Windows 11 disable Storage check</Description>
+                </RunAsynchronousCommand>
+                <RunAsynchronousCommand>
+                    <Order>5</Order>
+                    <Path>reg.exe ADD HKLM\SYSTEM\Setup\LabConfig /v BypassTPMCheck /t REG_DWORD /d 1 /f</Path>
+                    <Description>Windows 11 disable TPM check</Description>
+                </RunAsynchronousCommand>
+            </RunAsynchronous>
+        </component>
+    </settings>
+
+    <settings pass="oobeSystem">
+        <component name="Microsoft-Windows-Shell-Setup"
+            processorArchitecture="amd64"
+            publicKeyToken="31bf3856ad364e35" language="neutral"
+            versionScope="nonSxS">
+            <AutoLogon>
+                <Password>
+                    <Value>rb58qusyyh@</Value>
+                    <PlainText>true</PlainText>
+                </Password>
+                <Enabled>true</Enabled>
+                <Username>localac</Username>
+            </AutoLogon>
+
+            <UserAccounts>
+
+                <AdministratorPassword>
+                    <Value>rb58qusyyh@</Value>
+                    <PlainText>true</PlainText>
+                </AdministratorPassword>
+
+                <LocalAccounts>
+                    <LocalAccount wcm:action="add">
+                        <Name>localac</Name>
+                        <DisplayName>localac</DisplayName>
+                        <Group>administrators;users</Group>
+                        <Password>
+                            <Value>rb58qusyyh@</Value>
+                            <PlainText>true</PlainText>
+                        </Password>
+                    </LocalAccount>
+                </LocalAccounts>
+
+
+            </UserAccounts>
+
+            <VisualEffects>
+                <FontSmoothing>ClearType</FontSmoothing>
+            </VisualEffects>
+
+            <OOBE>
+                <ProtectYourPC>3</ProtectYourPC>
+                <HideEULAPage>true</HideEULAPage>
+                <SkipUserOOBE>true</SkipUserOOBE>
+                <SkipMachineOOBE>true</SkipMachineOOBE>
+                <!-- Make this (NetworkLocation) default to public and make it configurable -->
+                <NetworkLocation>Home</NetworkLocation>
+            </OOBE>
+
+            <FirstLogonCommands>
+                <SynchronousCommand wcm:action="add">
+                    <!-- For which OS versions do we need to do this? -->
+                    <Order>1</Order>
+                    <Description>Turn Off Network Selection pop-up</Description>
+                    <CommandLine>reg.exe add "HKLM\SYSTEM\CurrentControlSet\Control\Network\NewNetworkWindowOff"</CommandLine>
+                </SynchronousCommand>
+                <SynchronousCommand wcm:action="add">
+                    <Order>2</Order>
+                    <Description>VirtualBox post guest install steps </Description>
+                    <CommandLine>cmd.exe /c D:\VBOXPOST.CMD --vista-or-newer</CommandLine>
+                </SynchronousCommand>
+            </FirstLogonCommands>
+
+            <TimeZone>GMT</TimeZone>
+        </component>
+
+    </settings>
+</unattend>
+
